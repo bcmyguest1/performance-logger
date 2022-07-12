@@ -43,51 +43,33 @@ class PerformanceLogger:
 _inst = PerformanceLogger()
 log_time = _inst.perf_log
 
-import uuid
-import logging
+if __name__ == "__main__":
+    # basic usage
+    import uuid
+    import logging
 
-# Log format
+    # Log format
+    _format = logging.Formatter(
+        '%(asctime)s %(levelname)s %(name)s.%(funcName)s : %(message)s',
+        '%Y-%m-%d %H:%M:%S')
 
-_format = logging.Formatter(
-    '%(asctime)s %(levelname)s %(aws_request_id)s %(name)s.%(funcName)s : %(message)s',
-    '%Y-%m-%d %H:%M:%S')
-
-
-class RequestContextFilter(logging.Filter):
-    def __init__(self):
-        self.aws_request_id = str(uuid.uuid4())
-        super().__init__()
-
-    def filter(self, record):
-        if not hasattr(record, 'aws_request_id'):
-            record.aws_request_id = self.aws_request_id
-        return True
-
-
-def init():
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
-    if logger.handlers:
-        logger.handlers[0].setLevel(logging.INFO)
-        logger.handlers[0].setFormatter(_format)
-    else:
+    def init():
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(logging.INFO)
-        stream_handler.terminator = '\n\r'
         stream_handler.setFormatter(_format)
-        stream_handler.addFilter(RequestContextFilter())
         logger.addHandler(stream_handler)
 
 
-level = logging.INFO
-init()
+    level = logging.INFO
+    init()
 
 
-@log_time()
-def func(test, n=1_000_000):
-    for _ in range(n):
-        test = test ** 2
+    @log_time()
+    def func(test, n=1_000_000):
+        for _ in range(n):
+            test = test ** 2
 
 
-func(1)
+    func(1)
